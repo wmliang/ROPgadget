@@ -133,15 +133,31 @@ class Gadgets(object):
 
         if arch  == CS_ARCH_X86:
             gadgets = [
-                               [b"\xff[\x20\x21\x22\x23\x26\x27]{1}", 2, 1],     # jmp  [reg]
-                               [b"\xff[\xe0\xe1\xe2\xe3\xe4\xe6\xe7]{1}", 2, 1], # jmp  [reg]
-                               [b"\xff[\x10\x11\x12\x13\x16\x17]{1}", 2, 1],     # jmp  [reg]
-                               [b"\xff[\xd0\xd1\xd2\xd3\xd4\xd6\xd7]{1}", 2, 1],  # call [reg]
+                               [b"\xff[\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7]{1}", 2, 1],    # jmp reg
+                               [b"\xff[\x20\x21\x22\x23\x26\x27]{1}", 2, 1],            # jmp [reg]
+                               [b"\xff[\x24\x60\x61\x62\x63\x65\x66\x67]{1}", 3, 1],    # jmp [reg+disp8]
+                               [b"\xff\x64", 4, 1],                                     # jmp [reg1+reg2*i+disp8]
+                               [b"\xff[\xa0\xa1\xa2\xa3\xa5\xa6\xa7]{1}", 6, 1],        # jmp [reg+disp32]
+                               [b"\xff\xa4", 7, 1],                                     # jmp [reg1+reg2*i+disp32]
+                               [b"\xff[\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7]{1}", 2, 1],    # call reg
+                               [b"\xff[\x10\x11\x12\x13\x16\x17]{1}", 2, 1],            # call [reg]
+                               [b"\xff[\x14\x50\x51\x52\x53\x55\x56\x57]{1}", 3, 1],    # call [reg+disp8]
+                               [b"\xff\x54", 4, 1],                                     # call [reg1+reg2*i+disp8]
+                               [b"\xff[\x90\x91\x92\x93\x95\x96\x97]{1}", 6, 1],        # call [reg+disp32]
+                               [b"\xff\x94", 7, 1],                                     # call [reg1+reg2*i+disp32]
                                # MPX
-                               [b"\xf2\xff[\x20\x21\x22\x23\x26\x27]{1}", 3, 1],     # jmp  [reg]
-                               [b"\xf2\xff[\xe0\xe1\xe2\xe3\xe4\xe6\xe7]{1}", 3, 1], # jmp  [reg]
-                               [b"\xf2\xff[\x10\x11\x12\x13\x16\x17]{1}", 3, 1],     # jmp  [reg]
-                               [b"\xf2\xff[\xd0\xd1\xd2\xd3\xd4\xd6\xd7]{1}", 3, 1]  # call [reg]
+                               [b"\xf2\xff[\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7]{1}", 3, 1],    # jmp reg
+                               [b"\xf2\xff[\x20\x21\x22\x23\x26\x27]{1}", 3, 1],            # jmp [reg]
+                               [b"\xf2\xff[\x24\x60\x61\x62\x63\x65\x66\x67]{1}", 4, 1],    # jmp [reg+disp8]
+                               [b"\xf2\xff\x64", 5, 1],                                     # jmp [reg1+reg2*i+disp8]
+                               [b"\xf2\xff[\xa0\xa1\xa2\xa3\xa5\xa6\xa7]{1}", 7, 1],        # jmp [reg+disp32]
+                               [b"\xf2\xff\xa4", 8, 1],                                     # jmp [reg1+reg2*i+disp32]
+                               [b"\xf2\xff[\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7]{1}", 3, 1],    # call reg
+                               [b"\xf2\xff[\x10\x11\x12\x13\x16\x17]{1}", 3, 1],            # call [reg]
+                               [b"\xf2\xff[\x14\x50\x51\x52\x53\x55\x56\x57]{1}", 4, 1],    # call [reg+disp8]
+                               [b"\xf2\xff\x54", 5, 1],                                     # call [reg1+reg2*i+disp8]
+                               [b"\xf2\xff[\x90\x91\x92\x93\x95\x96\x97]{1}", 7, 1],        # call [reg+disp32]
+                               [b"\xf2\xff\x94", 8, 1]                                      # call [reg1+reg2*i+disp32]
                       ]
 
 
@@ -166,14 +182,15 @@ class Gadgets(object):
         elif arch == CS_ARCH_ARM:
             if self.__options.thumb or self.__options.rawMode == "thumb":
                 gadgets = [
-                               [b"[\x00\x08\x10\x18\x20\x28\x30\x38\x40\x48\x70]{1}\x47", 2, 2], # bx   reg
-                               [b"[\x80\x88\x90\x98\xa0\xa8\xb0\xb8\xc0\xc8\xf0]{1}\x47", 2, 2], # blx  reg
+                               [b"[\x00\x08\x10\x18\x20\x28\x30\x38\x40\x48\x50\x58\x60\x68\x70]{1}\x47", 2, 2], # bx   reg
+                               [b"[\x80\x88\x90\x98\xa0\xa8\xb0\xb8\xc0\xc8\xd0\xd8\xe0\xe8\xf0]{1}\x47", 2, 2], # blx  reg
                                [b"[\x00-\xff]{1}\xbd", 2, 2]                                     # pop {,pc}
                           ]
                 arch_mode = CS_MODE_THUMB
             else:
                 gadgets = [
                                [b"[\x10-\x19\x1e]{1}\xff\x2f\xe1", 4, 4],  # bx   reg
+                               [b"[\x20-\x29\x2e]{1}\xff\x2f\xe1", 4, 4],  # bxj  reg
                                [b"[\x30-\x39\x3e]{1}\xff\x2f\xe1", 4, 4],  # blx  reg
                                [b"[\x00-\xff][\x80-\xff][\x10-\x1e\x30-\x3e\x50-\x5e\x70-\x7e\x90-\x9e\xb0-\xbe\xd0-\xde\xf0-\xfe][\xe8\xe9]", 4, 4] # ldm {,pc}
                           ]
